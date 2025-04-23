@@ -3,8 +3,9 @@ from flask import Flask, request, jsonify
 import pickle
 import numpy as np
 
+app = Flask(__name__)  # 👈 Primero inicializamos Flask
 
-# Cargamos el modelo y los codificadores entrenados
+# 👇 Luego cargamos el modelo
 with open("model.pkl", "rb") as f:
     model = pickle.load(f)
 
@@ -13,7 +14,6 @@ with open("rating_encoder.pkl", "rb") as f:
 
 with open("type_encoder.pkl", "rb") as f:
     type_encoder = pickle.load(f)
-app = Flask(__name__)
 
 
 @app.route("/")
