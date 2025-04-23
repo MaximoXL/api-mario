@@ -22,11 +22,11 @@ def home():
     <h1>API de Letras, Fechas y Machine Learning</h1>
     <p>Bienvenido a tu API. Aquí tienes los endpoints disponibles:</p>
     <ul>
-        <li><b><a href="http://localhost:5050/predict?value=LETRA" target="_blank">/predict?value=LETRA</a></b> → Devuelve la posición de la letra en el abecedario</li>
-        <li><b><a href="http://localhost:5050/tipo?value=LETRA" target="_blank">/tipo?value=LETRA</a></b> → Indica si la letra es vocal o consonante</li>
-        <li><b><a href="http://localhost:5050/fecha?value=2025-04-22" target="_blank">/fecha?value=YYYY-MM-DD</a></b> → Devuelve el día de la semana de esa fecha</li>
-        <li><b><a href="http://localhost:5050/modelo?release_year=2021&duration=1&rating=TV-PG" target="_blank">/modelo?release_year=2021&duration=1&rating=TV-PG</a></b> 
-        <li><b><a href="http://localhost:5050/hello" target="_blank">/hello</a></b> → Endpoint extra para redespliegue</li>
+        <li><b><a href="https://api-mario.onrender.com/predict?value=LETRA" target="_blank">/predict?value=LETRA</a></b> → Devuelve la posición de la letra en el abecedario</li>
+        <li><b><a href="https://api-mario.onrender.com/tipo?value=LETRA" target="_blank">/tipo?value=LETRA</a></b> → Indica si la letra es vocal o consonante</li>
+        <li><b><a href="https://api-mario.onrender.com/fecha?value=2025-04-22" target="_blank">/fecha?value=YYYY-MM-DD</a></b> → Devuelve el día de la semana de esa fecha</li>
+        <li><b><a href="https://api-mario.onrender.com/modelo?release_year=2021&duration=1&rating=TV-PG" target="_blank">/modelo?release_year=2021&duration=1&rating=TV-PG</a></b> → Usa el modelo para predecir si es Movie o TV Show</li>
+        <li><b><a href="https://api-mario.onrender.com/hello" target="_blank">/hello</a></b> → Endpoint extra para redespliegue</li>
     </ul>
     """
 
