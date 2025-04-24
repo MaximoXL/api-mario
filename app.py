@@ -1,12 +1,11 @@
 from datetime import datetime
-from flask import Flask, request, jsonify
+from flask import Flask, request
 import pickle
 import numpy as np
 
-# Inicializamos la app Flask
 app = Flask(__name__)
 
-# Cargamos el modelo y los codificadores entrenados
+# Cargamos el modelo y codificadores
 with open("model.pkl", "rb") as f:
     model = pickle.load(f)
 
@@ -16,8 +15,6 @@ with open("rating_encoder.pkl", "rb") as f:
 with open("type_encoder.pkl", "rb") as f:
     type_encoder = pickle.load(f)
 
-# Página principal con enlaces
-
 
 @app.route("/")
 def home():
@@ -25,15 +22,44 @@ def home():
     <h1>API de Letras, Fechas y Machine Learning</h1>
     <p>Bienvenido a tu API. Aquí tienes los endpoints disponibles:</p>
     <ul>
-        <li><b><a href="https://api-mario.onrender.com/predict?value=LETRA" target="_blank">/predict?value=LETRA</a></b> → Devuelve la posición de la letra en el abecedario</li>
-        <li><b><a href="https://api-mario.onrender.com/tipo?value=LETRA" target="_blank">/tipo?value=LETRA</a></b> → Indica si la letra es vocal o consonante</li>
-        <li><b><a href="https://api-mario.onrender.com/fecha?value=2025-04-22" target="_blank">/fecha?value=YYYY-MM-DD</a></b> → Devuelve el día de la semana de esa fecha</li>
-        <li><b><a href="https://api-mario.onrender.com/modelo?release_year=2021&duration=1&rating=TV-PG" target="_blank">/modelo?release_year=2021&duration=1&rating=TV-PG</a></b> → Usa el modelo para predecir si es Movie o TV Show</li>
-        <li><b><a href="https://api-mario.onrender.com/hello" target="_blank">/hello</a></b> → Endpoint extra para redespliegue</li>
+        <li><a href="/predict?value=A">/predict?value=LETRA</a> → Devuelve la posición de la letra en el abecedario</li>
+        <li><a href="/tipo?value=A">/tipo?value=LETRA</a> → Indica si la letra es vocal o consonante</li>
+        <li><a href="/fecha?value=2025-04-24">/fecha?value=YYYY-MM-DD</a> → Devuelve el día de la semana de esa fecha</li>
+        <li><a href="/modelo?release_year=2021&duration=100&rating=TV-PG">/modelo?release_year=YYYY&duration=NUM&rating=CLASIFICACION</a> → Usa el modelo para predecir si es Movie o TV Show</li>
+        <li><a href="/hello">/hello</a> → Endpoint extra para redespliegue</li>
     </ul>
     """
 
-# Endpoint de predicción con modelo
+
+@app.route("/predict")
+def predict():
+    letra = request.args.get("value", "").lower()
+    if len(letra) != 1 or not letra.isalpha():
+        return "<h3>❌ Error</h3><p>Debes enviar solo UNA letra del abecedario.</p>"
+    posicion = ord(letra) - ord('a') + 1
+    return f"<h3>✅ Resultado</h3><p>La letra <strong>{letra.upper()}</strong> está en la posición <strong>{posicion}</strong> del abecedario.</p>"
+
+
+@app.route("/tipo")
+def tipo():
+    letra = request.args.get("value", "").lower()
+    if len(letra) != 1 or not letra.isalpha():
+        return "<h3>❌ Error</h3><p>Debes enviar solo UNA letra válida.</p>"
+    tipo = "vocal" if letra in "aeiou" else "consonante"
+    return f"<h3>✅ Resultado</h3><p>La letra <strong>{letra.upper()}</strong> es una <strong>{tipo}</strong>.</p>"
+
+
+@app.route("/fecha")
+def fecha():
+    valor = request.args.get("value", "")
+    try:
+        fecha_obj = datetime.strptime(valor, "%Y-%m-%d")
+        dias = ["lunes", "martes", "miércoles",
+                "jueves", "viernes", "sábado", "domingo"]
+        dia = dias[fecha_obj.weekday()]
+        return f"<h3>📅 Fecha</h3><p>El <strong>{valor}</strong> fue un <strong>{dia}</strong>.</p>"
+    except ValueError:
+        return "<h3>❌ Error</h3><p>Formato incorrecto. Usa YYYY-MM-DD</p>"
 
 
 @app.route("/modelo")
@@ -48,53 +74,16 @@ def modelo():
         prediction = model.predict(input_data)[0]
         resultado = type_encoder.inverse_transform([prediction])[0]
 
-        return jsonify({"prediction": resultado})
+        return f"<h3>🎬 Predicción</h3><p>Con esos datos, el modelo predice que es un <strong>{resultado}</strong>.</p>"
+
     except Exception as e:
-        return jsonify({"error": str(e)})
-
-# Endpoint para saber posición de la letra
-
-
-@app.route("/predict")
-def predict():
-    letra = request.args.get("value", "").lower()
-    if len(letra) != 1 or not letra.isalpha():
-        return jsonify({"error": "Debes enviar solo UNA letra del abecedario."})
-
-    posicion = ord(letra) - ord('a') + 1
-    return jsonify({"position": posicion})
-
-# Endpoint de saludo (para pruebas o redespliegue)
+        return f"<h3>❌ Error</h3><p>{str(e)}</p>"
 
 
 @app.route("/hello")
 def hello():
-    return "¡Hola mundo desde el endpoint secreto!"
-
-# Endpoint que indica si una letra es vocal o consonante
+    return "<h3>👋 ¡Hola mundo desde el endpoint secreto!</h3>"
 
 
-@app.route("/tipo")
-def tipo():
-    letra = request.args.get("value", "").lower()
-    if len(letra) != 1 or not letra.isalpha():
-        return jsonify({"error": "Debes enviar solo UNA letra válida."})
-    if letra in "aeiou":
-        return jsonify({"tipo": "vocal"})
-    else:
-        return jsonify({"tipo": "consonante"})
-
-# Endpoint que dice qué día cae una fecha
-
-
-@app.route("/fecha")
-def fecha():
-    valor = request.args.get("value", "")
-    try:
-        fecha = datetime.strptime(valor, "%Y-%m-%d")
-        dias_semana = ["lunes", "martes", "miércoles",
-                       "jueves", "viernes", "sábado", "domingo"]
-        dia = dias_semana[fecha.weekday()]
-        return jsonify({"dia": dia})
-    except ValueError:
-        return jsonify({"error": "Formato incorrecto. Usa YYYY-MM-DD"})
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5050)
