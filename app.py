@@ -3,9 +3,10 @@ from flask import Flask, request, jsonify
 import pickle
 import numpy as np
 
-app = Flask(__name__)  # 👈 Primero inicializamos Flask
+# Inicializamos la app Flask
+app = Flask(__name__)
 
-# 👇 Luego cargamos el modelo
+# Cargamos el modelo y los codificadores entrenados
 with open("model.pkl", "rb") as f:
     model = pickle.load(f)
 
@@ -14,6 +15,8 @@ with open("rating_encoder.pkl", "rb") as f:
 
 with open("type_encoder.pkl", "rb") as f:
     type_encoder = pickle.load(f)
+
+# Página principal con enlaces
 
 
 @app.route("/")
@@ -30,64 +33,63 @@ def home():
     </ul>
     """
 
+# Endpoint de predicción con modelo
+
 
 @app.route("/modelo")
 def modelo():
     try:
-        # Recibimos los parámetros por GET
         release_year = int(request.args.get("release_year"))
         duration = int(request.args.get("duration"))
         rating = request.args.get("rating")
 
-        # Codificamos el rating
         rating_encoded = rating_encoder.transform([rating])[0]
-
-        # Creamos el array de entrada
         input_data = np.array([[release_year, duration, rating_encoded]])
-
-        # Predecimos
         prediction = model.predict(input_data)[0]
         resultado = type_encoder.inverse_transform([prediction])[0]
 
         return jsonify({"prediction": resultado})
-
     except Exception as e:
         return jsonify({"error": str(e)})
+
+# Endpoint para saber posición de la letra
 
 
 @app.route("/predict")
 def predict():
     letra = request.args.get("value", "").lower()
-
     if len(letra) != 1 or not letra.isalpha():
         return jsonify({"error": "Debes enviar solo UNA letra del abecedario."})
 
     posicion = ord(letra) - ord('a') + 1
     return jsonify({"position": posicion})
 
+# Endpoint de saludo (para pruebas o redespliegue)
+
 
 @app.route("/hello")
 def hello():
     return "¡Hola mundo desde el endpoint secreto!"
 
+# Endpoint que indica si una letra es vocal o consonante
+
 
 @app.route("/tipo")
 def tipo():
     letra = request.args.get("value", "").lower()
-
     if len(letra) != 1 or not letra.isalpha():
         return jsonify({"error": "Debes enviar solo UNA letra válida."})
-
     if letra in "aeiou":
         return jsonify({"tipo": "vocal"})
     else:
         return jsonify({"tipo": "consonante"})
 
+# Endpoint que dice qué día cae una fecha
+
 
 @app.route("/fecha")
 def fecha():
     valor = request.args.get("value", "")
-
     try:
         fecha = datetime.strptime(valor, "%Y-%m-%d")
         dias_semana = ["lunes", "martes", "miércoles",
@@ -96,7 +98,3 @@ def fecha():
         return jsonify({"dia": dia})
     except ValueError:
         return jsonify({"error": "Formato incorrecto. Usa YYYY-MM-DD"})
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5050)
