@@ -8,6 +8,17 @@ Bienvenido a esta API desarrollada con **Flask** y **Machine Learning**, capaz d
 - Predecir si un contenido es una **película o serie** usando un modelo de Machine Learning.
 
 ---
+# API Mario
+
+Este proyecto es una API inspirada en el universo de Mario, desarrollada con Python y FastAPI.
+
+##  Requisitos
+
+Antes de ejecutar este proyecto, asegúrate de tener instaladas las siguientes herramientas:
+
+- **Python 3.10+**  
+- **Visual Studio Code** (recomendado como entorno de desarrollo)
+- **Git** (para clonar el repositorio)
 
 ## API desplegada en Render
 
@@ -100,6 +111,6 @@ python app.py
 
 ---
 
-## ✨ Autor
+## Autor
 
 **Mario Tena Rufo**
